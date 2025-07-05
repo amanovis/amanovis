@@ -1,0 +1,18 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  IMAGE_NAME: my-flask-app
+
+build:
+  stage: build
+  script:
+    - docker build -t $IMAGE_NAME .
+    - docker save $IMAGE_NAME > $IMAGE_NAME.tar
+
+deploy:
+  stage: deploy
+  script:
+    - scp $IMAGE_NAME.tar user@your-ec2:/home/user/
+    - ssh user@your-ec2 "docker load < /home/user/$IMAGE_NAME.tar &&               docker stop flask || true && docker rm flask || true &&               docker run -d -p 80:80 --name flask $IMAGE_NAME"
